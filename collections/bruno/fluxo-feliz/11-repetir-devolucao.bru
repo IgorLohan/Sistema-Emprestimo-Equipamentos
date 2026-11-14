@@ -6,8 +6,18 @@ meta {
 
 patch {
   url: {{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao
-  body: none
+  body: json
   auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "condicao": "AVARIADO"
+  }
 }
 
 tests {

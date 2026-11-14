@@ -211,6 +211,11 @@
           ],
           "request": {
             "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condicao\": \"AVARIADO\"\n}"
+            },
             "url": "{{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao"
           }
         },
@@ -230,6 +235,11 @@
           ],
           "request": {
             "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condicao\": \"AVARIADO\"\n}"
+            },
             "url": "{{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao"
           }
         }

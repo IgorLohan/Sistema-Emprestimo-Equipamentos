@@ -191,7 +191,13 @@
       "name": "Registrar devolução",
       "method": "PATCH",
       "url": "{{ _.baseUrl }}/api/v1/emprestimos/{{ _.emprestimoId }}/devolucao",
-      "headers": [],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"condicao\": \"AVARIADO\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
       "parameters": [],
       "metaSortKey": 10
     },
@@ -202,7 +208,13 @@
       "name": "Repetir devolução",
       "method": "PATCH",
       "url": "{{ _.baseUrl }}/api/v1/emprestimos/{{ _.emprestimoId }}/devolucao",
-      "headers": [],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"condicao\": \"AVARIADO\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
       "parameters": [],
       "metaSortKey": 11
     },
