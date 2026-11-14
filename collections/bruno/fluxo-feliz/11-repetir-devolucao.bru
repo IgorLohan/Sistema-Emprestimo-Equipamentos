@@ -1,0 +1,21 @@
+meta {
+  name: Repetir devolução
+  type: http
+  seq: 11
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao
+  body: none
+  auth: none
+}
+
+tests {
+  test("200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("permanece DEVOLVIDO", function() {
+    expect(res.getBody().status).to.equal("DEVOLVIDO");
+  });
+}

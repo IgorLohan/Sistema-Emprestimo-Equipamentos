@@ -1,0 +1,21 @@
+meta {
+  name: Repetir a mesma reserva
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/v1/equipamentos/{{equipamentoId}}/reservas/{{emprestimoId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("mesma reserva", function() {
+    expect(res.getBody().reservaEmprestimoId).to.equal(bru.getEnvVar("emprestimoId"));
+  });
+}

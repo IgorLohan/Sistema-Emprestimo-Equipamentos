@@ -1,0 +1,28 @@
+meta {
+  name: Empréstimo com equipamento inexistente
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/emprestimos
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuarioId": "{{usuarioId}}",
+    "equipamentoId": "22222222-2222-2222-2222-222222222222"
+  }
+}
+
+tests {
+  test("404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

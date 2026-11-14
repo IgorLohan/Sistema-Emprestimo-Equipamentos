@@ -1,0 +1,21 @@
+meta {
+  name: Registrar devolução
+  type: http
+  seq: 10
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao
+  body: none
+  auth: none
+}
+
+tests {
+  test("200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("DEVOLVIDO", function() {
+    expect(res.getBody().status).to.equal("DEVOLVIDO");
+  });
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Dados de usuário inválidos
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nome": "",
+    "email": "email-invalido",
+    "matricula": ""
+  }
+}
+
+tests {
+  test("400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

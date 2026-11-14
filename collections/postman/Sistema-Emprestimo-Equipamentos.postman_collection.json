@@ -1,0 +1,339 @@
+{
+  "info": {
+    "name": "Sistema de Empréstimo de Equipamentos",
+    "description": "Fluxos do exercício de microsserviços síncronos. Execute a pasta Fluxo feliz de cima para baixo, com a API Gateway em http://localhost:8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "usuarioId", "value": "" },
+    { "key": "equipamentoId", "value": "" },
+    { "key": "emprestimoId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Fluxo feliz",
+      "item": [
+        {
+          "name": "Cadastrar usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('usuarioId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Ana Souza\",\n  \"email\": \"ana.{{$timestamp}}@escola.edu\",\n  \"matricula\": \"MAT{{$timestamp}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/usuarios"
+          }
+        },
+        {
+          "name": "Consultar usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/usuarios/{{usuarioId}}"
+          }
+        },
+        {
+          "name": "Cadastrar equipamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('equipamentoId', body.id);",
+                  "pm.test('disponível', () => pm.expect(body.disponivel).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Notebook Lab 01\",\n  \"tipo\": \"Notebook\",\n  \"patrimonio\": \"PAT{{$timestamp}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/equipamentos"
+          }
+        },
+        {
+          "name": "Listar equipamentos disponíveis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/equipamentos/disponiveis"
+          }
+        },
+        {
+          "name": "Solicitar empréstimo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('emprestimoId', body.id);",
+                  "pm.test('ATIVO', () => pm.expect(body.status).to.eql('ATIVO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": \"{{usuarioId}}\",\n  \"equipamentoId\": \"{{equipamentoId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/emprestimos"
+          }
+        },
+        {
+          "name": "Consultar empréstimo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}"
+          }
+        },
+        {
+          "name": "Consultar empréstimos do usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/emprestimos/usuarios/{{usuarioId}}"
+          }
+        },
+        {
+          "name": "Repetir a mesma reserva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('mesma reserva', () => pm.expect(pm.response.json().reservaEmprestimoId).to.eql(pm.collectionVariables.get('emprestimoId')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/equipamentos/{{equipamentoId}}/reservas/{{emprestimoId}}"
+          }
+        },
+        {
+          "name": "Segundo empréstimo do mesmo equipamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('409', () => pm.response.to.have.status(409));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": \"{{usuarioId}}\",\n  \"equipamentoId\": \"{{equipamentoId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/emprestimos"
+          }
+        },
+        {
+          "name": "Registrar devolução",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('DEVOLVIDO', () => pm.expect(pm.response.json().status).to.eql('DEVOLVIDO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao"
+          }
+        },
+        {
+          "name": "Repetir devolução",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('permanece DEVOLVIDO', () => pm.expect(pm.response.json().status).to.eql('DEVOLVIDO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}/devolucao"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Erros",
+      "item": [
+        {
+          "name": "Usuário inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/usuarios/11111111-1111-1111-1111-111111111111"
+          }
+        },
+        {
+          "name": "Empréstimo com usuário inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": \"11111111-1111-1111-1111-111111111111\",\n  \"equipamentoId\": \"{{equipamentoId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/emprestimos"
+          }
+        },
+        {
+          "name": "Empréstimo com equipamento inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": \"{{usuarioId}}\",\n  \"equipamentoId\": \"22222222-2222-2222-2222-222222222222\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/emprestimos"
+          }
+        },
+        {
+          "name": "Dados de usuário inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"email\": \"email-invalido\",\n  \"matricula\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/usuarios"
+          }
+        },
+        {
+          "name": "Identificador inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/usuarios/nao-e-uuid"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Identificador inválido
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/usuarios/nao-e-uuid
+  body: none
+  auth: none
+}
+
+tests {
+  test("400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

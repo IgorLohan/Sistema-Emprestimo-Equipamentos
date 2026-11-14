@@ -1,0 +1,17 @@
+meta {
+  name: Usuário inexistente
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/usuarios/11111111-1111-1111-1111-111111111111
+  body: none
+  auth: none
+}
+
+tests {
+  test("404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Consultar empréstimos do usuário
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/emprestimos/usuarios/{{usuarioId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

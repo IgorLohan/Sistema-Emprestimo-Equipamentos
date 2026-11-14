@@ -1,0 +1,283 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-14T13:30:00.000Z",
+  "__export_source": "insomnia.desktop.app",
+  "resources": [
+    {
+      "_id": "wrk_emprestimos",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Sistema de Empréstimo de Equipamentos",
+      "description": "Fluxos do exercício de microsserviços síncronos. Execute a pasta Fluxo feliz de cima para baixo, com a API Gateway em http://localhost:8080.",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_emprestimos",
+      "name": "Base Environment",
+      "data": {
+        "baseUrl": "http://localhost:8080",
+        "sufixo": "1",
+        "usuarioId": "",
+        "equipamentoId": "",
+        "emprestimoId": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["baseUrl", "sufixo", "usuarioId", "equipamentoId", "emprestimoId"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "jar_base",
+      "_type": "cookie_jar",
+      "parentId": "wrk_emprestimos",
+      "name": "Default Jar",
+      "cookies": []
+    },
+    {
+      "_id": "fld_fluxo",
+      "_type": "request_group",
+      "parentId": "wrk_emprestimos",
+      "name": "Fluxo feliz",
+      "description": "Execute de cima para baixo. As respostas gravam usuarioId, equipamentoId e emprestimoId no ambiente.",
+      "environment": {},
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_erros",
+      "_type": "request_group",
+      "parentId": "wrk_emprestimos",
+      "name": "Erros",
+      "description": "Depende dos ids gravados pelo Fluxo feliz, exceto as consultas com identificador fixo.",
+      "environment": {},
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_fluxo_01",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Cadastrar usuário",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/usuarios",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ana Souza\",\n  \"email\": \"ana.{{ _.sufixo }}@escola.edu\",\n  \"matricula\": \"MAT{{ _.sufixo }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 1,
+      "preRequestScript": "insomnia.environment.set('sufixo', Date.now().toString());",
+      "afterResponseScript": "const body = insomnia.response.json();\nif (body && body.id) {\n  insomnia.environment.set('usuarioId', body.id);\n}"
+    },
+    {
+      "_id": "req_fluxo_02",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Consultar usuário",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/usuarios/{{ _.usuarioId }}",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_fluxo_03",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Cadastrar equipamento",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/equipamentos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Notebook Lab 01\",\n  \"tipo\": \"Notebook\",\n  \"patrimonio\": \"PAT{{ _.sufixo }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 3,
+      "preRequestScript": "if (!insomnia.environment.get('sufixo')) {\n  insomnia.environment.set('sufixo', Date.now().toString());\n}",
+      "afterResponseScript": "const body = insomnia.response.json();\nif (body && body.id) {\n  insomnia.environment.set('equipamentoId', body.id);\n}"
+    },
+    {
+      "_id": "req_fluxo_04",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Listar equipamentos disponíveis",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/equipamentos/disponiveis",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 4
+    },
+    {
+      "_id": "req_fluxo_05",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Solicitar empréstimo",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"usuarioId\": \"{{ _.usuarioId }}\",\n  \"equipamentoId\": \"{{ _.equipamentoId }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 5,
+      "afterResponseScript": "const body = insomnia.response.json();\nif (body && body.id) {\n  insomnia.environment.set('emprestimoId', body.id);\n}"
+    },
+    {
+      "_id": "req_fluxo_06",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Consultar empréstimo",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos/{{ _.emprestimoId }}",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 6
+    },
+    {
+      "_id": "req_fluxo_07",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Consultar empréstimos do usuário",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos/usuarios/{{ _.usuarioId }}",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 7
+    },
+    {
+      "_id": "req_fluxo_08",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Repetir a mesma reserva",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/v1/equipamentos/{{ _.equipamentoId }}/reservas/{{ _.emprestimoId }}",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 8
+    },
+    {
+      "_id": "req_fluxo_09",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Segundo empréstimo do mesmo equipamento",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"usuarioId\": \"{{ _.usuarioId }}\",\n  \"equipamentoId\": \"{{ _.equipamentoId }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 9
+    },
+    {
+      "_id": "req_fluxo_10",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Registrar devolução",
+      "method": "PATCH",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos/{{ _.emprestimoId }}/devolucao",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 10
+    },
+    {
+      "_id": "req_fluxo_11",
+      "_type": "request",
+      "parentId": "fld_fluxo",
+      "name": "Repetir devolução",
+      "method": "PATCH",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos/{{ _.emprestimoId }}/devolucao",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 11
+    },
+    {
+      "_id": "req_erro_01",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "Usuário inexistente",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/usuarios/11111111-1111-1111-1111-111111111111",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_erro_02",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "Empréstimo com usuário inexistente",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"usuarioId\": \"11111111-1111-1111-1111-111111111111\",\n  \"equipamentoId\": \"{{ _.equipamentoId }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_erro_03",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "Empréstimo com equipamento inexistente",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/emprestimos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"usuarioId\": \"{{ _.usuarioId }}\",\n  \"equipamentoId\": \"22222222-2222-2222-2222-222222222222\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_erro_04",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "Dados de usuário inválidos",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/v1/usuarios",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"\",\n  \"email\": \"email-invalido\",\n  \"matricula\": \"\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "metaSortKey": 4
+    },
+    {
+      "_id": "req_erro_05",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "Identificador inválido",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/v1/usuarios/nao-e-uuid",
+      "headers": [],
+      "parameters": [],
+      "metaSortKey": 5
+    }
+  ]
+}

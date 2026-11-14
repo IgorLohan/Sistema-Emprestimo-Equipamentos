@@ -1,0 +1,17 @@
+meta {
+  name: Consultar empréstimo
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/emprestimos/{{emprestimoId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

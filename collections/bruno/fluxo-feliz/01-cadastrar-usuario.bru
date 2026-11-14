@@ -1,0 +1,36 @@
+meta {
+  name: Cadastrar usuário
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nome": "Ana Souza",
+    "email": "ana.{{$timestamp}}@escola.edu",
+    "matricula": "MAT{{$timestamp}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.id) {
+    bru.setEnvVar("usuarioId", body.id);
+  }
+}
+
+tests {
+  test("201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

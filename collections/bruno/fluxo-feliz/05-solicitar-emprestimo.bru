@@ -1,0 +1,39 @@
+meta {
+  name: Solicitar empréstimo
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/emprestimos
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuarioId": "{{usuarioId}}",
+    "equipamentoId": "{{equipamentoId}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.id) {
+    bru.setEnvVar("emprestimoId", body.id);
+  }
+}
+
+tests {
+  test("201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("ATIVO", function() {
+    expect(res.getBody().status).to.equal("ATIVO");
+  });
+}
