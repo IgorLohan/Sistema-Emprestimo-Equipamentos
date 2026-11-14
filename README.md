@@ -103,10 +103,11 @@ Todos passam pela Gateway em `http://localhost:8080`.
 | GET | `/api/v1/equipamentos/disponiveis` | Listar disponíveis |
 | PUT | `/api/v1/equipamentos/{id}/reservas/{emprestimoId}` | Reservar, de forma idempotente |
 | DELETE | `/api/v1/equipamentos/{id}/reservas/{emprestimoId}` | Liberar reserva, de forma idempotente |
+| PUT | `/api/v1/equipamentos/{id}/condicao` | Alterar condição para `BOM` ou `AVARIADO` |
 | POST | `/api/v1/emprestimos` | Solicitar empréstimo |
 | GET | `/api/v1/emprestimos/{id}` | Consultar empréstimo |
 | GET | `/api/v1/emprestimos/usuarios/{usuarioId}` | Empréstimos do usuário |
-| PATCH | `/api/v1/emprestimos/{id}/devolucao` | Registrar devolução |
+| PATCH | `/api/v1/emprestimos/{id}/devolucao` | Registrar devolução com a condição do equipamento |
 
 E-mail e matrícula são únicos em `msusuario`. O e-mail é gravado em minúsculas. Patrimônio é único em `msequipamento`.
 
@@ -117,7 +118,7 @@ E-mail e matrícula são únicos em `msusuario`. O e-mail é gravado em minúscu
 3. O `msemprestimo` consulta o usuário no `msusuario`. Se não existir, responde `404`.
 4. Consulta o equipamento e pede a reserva atômica no `msequipamento`, usando o id do empréstimo que será gravado. Equipamento inexistente responde `404`. Equipamento ocupado por outra reserva responde `409`.
 5. Só depois da reserva o empréstimo é gravado com status `ATIVO` e a resposta é `201`.
-6. Na devolução, o `msemprestimo` pede a liberação e marca o empréstimo como `DEVOLVIDO`. Repetir a devolução não libera de novo.
+6. Na devolução, o cliente informa `condicao` como `BOM` ou `AVARIADO`. O `msemprestimo` atualiza essa condição no `msequipamento` via OpenFeign, com Circuit Breaker. Se o `msequipamento` estiver indisponível, a resposta é `503` e o empréstimo continua `ATIVO`. Se a alteração funcionar, o fluxo libera a reserva e marca o empréstimo como `DEVOLVIDO`. Repetir a devolução não libera de novo nem troca a condição outra vez. Um `404` do equipamento não abre o circuito.
 
 A reserva usa bloqueio pessimista no PostgreSQL (`SELECT ... FOR UPDATE`). Repetir o `PUT` com o mesmo `emprestimoId` devolve o equipamento já reservado, sem reservar outra vez. O campo `reservaEmprestimoId` fica só no banco de equipamentos e não é chave estrangeira para o outro serviço.
 
@@ -172,7 +173,14 @@ HTTP/1.1 201 Created
 
 ```http
 PATCH http://localhost:8080/api/v1/emprestimos/{id}/devolucao
+Content-Type: application/json
+
+{
+  "condicao": "AVARIADO"
+}
 ```
+
+O circuito `msequipamentoCondicao` usa janela de 5 chamadas, mínimo de 3, taxa de falha de 50%, espera de 30 segundos aberto e 2 chamadas em half-open. Ele protege somente a alteração da condição.
 
 ## Erros tratados
 
@@ -198,5 +206,6 @@ A variável `baseUrl` aponta para `http://localhost:8080`. Execute a pasta **Flu
 Os bancos são independentes. Não existe transação distribuída.
 
 - Se o `msemprestimo` reservar o equipamento e falhar ao gravar o empréstimo, ele tenta liberar a reserva antes de responder. Se o processo cair entre a reserva e a gravação, o equipamento permanece reservado sem empréstimo correspondente. Nesse caso, libere com `DELETE /api/v1/equipamentos/{id}/reservas/{emprestimoId}`.
-- Se a liberação da devolução for concluída e a atualização do empréstimo falhar, uma nova chamada de devolução funciona: a liberação é idempotente quando o equipamento já está livre, e o status só muda de `ATIVO` para `DEVOLVIDO` uma vez.
+- Se a atualização da condição falhar por indisponibilidade, o empréstimo não é marcado como `DEVOLVIDO` e a reserva permanece. Uma nova devolução pode ser tentada quando o `msequipamento` voltar.
+- Se a liberação da devolução for concluída e a atualização do empréstimo falhar, uma nova chamada de devolução funciona: a condição é gravada de novo, a liberação é idempotente quando o equipamento já está livre, e o status só muda de `ATIVO` para `DEVOLVIDO` uma vez.
 - Apagar um usuário ou um equipamento no serviço de origem não apaga empréstimos já registrados. O empréstimo guarda somente os identificadores.
