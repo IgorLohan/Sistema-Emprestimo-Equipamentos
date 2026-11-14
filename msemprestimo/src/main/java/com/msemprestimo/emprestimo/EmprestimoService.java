@@ -1,7 +1,9 @@
 package com.msemprestimo.emprestimo;
 
+import com.msemprestimo.cliente.EquipamentoCondicaoClient;
 import com.msemprestimo.cliente.EquipamentoClient;
 import com.msemprestimo.cliente.UsuarioClient;
+import com.msemprestimo.emprestimo.dto.DevolucaoRequest;
 import com.msemprestimo.emprestimo.dto.EmprestimoRequest;
 import com.msemprestimo.emprestimo.dto.EmprestimoResponse;
 import com.msemprestimo.excecao.ComunicacaoException;
@@ -29,6 +31,7 @@ public class EmprestimoService {
 	private final EmprestimoGravacao gravacao;
 	private final UsuarioClient usuarioClient;
 	private final EquipamentoClient equipamentoClient;
+	private final EquipamentoCondicaoClient equipamentoCondicaoClient;
 
 	public EmprestimoResponse solicitar(EmprestimoRequest request) {
 		validarUsuario(request.usuarioId());
@@ -68,7 +71,7 @@ public class EmprestimoService {
 				.toList();
 	}
 
-	public EmprestimoResponse devolver(UUID id) {
+	public EmprestimoResponse devolver(UUID id, DevolucaoRequest request) {
 		Emprestimo emprestimo = repository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Empréstimo não encontrado"));
 
@@ -79,6 +82,7 @@ public class EmprestimoService {
 			throw new ConflitoException("Somente empréstimos ativos podem ser devolvidos");
 		}
 
+		equipamentoCondicaoClient.alterarCondicao(emprestimo.getEquipamentoId(), request.condicao());
 		liberarEquipamento(emprestimo.getEquipamentoId(), emprestimo.getId());
 
 		Emprestimo atualizado = gravacao.marcarDevolvido(id, LocalDateTime.now())

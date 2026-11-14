@@ -1,5 +1,6 @@
 package com.msequipamento.equipamento;
 
+import com.msequipamento.equipamento.dto.CondicaoRequest;
 import com.msequipamento.equipamento.dto.EquipamentoRequest;
 import com.msequipamento.equipamento.dto.EquipamentoResponse;
 import jakarta.validation.Valid;
@@ -42,6 +43,11 @@ public class EquipamentoController {
 	@GetMapping("/{id}")
 	public EquipamentoResponse buscar(@PathVariable UUID id) {
 		return service.buscarPorId(id);
+	}
+
+	@PutMapping(path = "/{id}/condicao", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public EquipamentoResponse alterarCondicao(@PathVariable UUID id, @Valid @RequestBody CondicaoRequest request) {
+		return service.atualizarCondicao(id, request.condicao());
 	}
 
 	@PutMapping("/{id}/reservas/{emprestimoId}")

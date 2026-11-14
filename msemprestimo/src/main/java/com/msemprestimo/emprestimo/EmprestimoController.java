@@ -1,5 +1,6 @@
 package com.msemprestimo.emprestimo;
 
+import com.msemprestimo.emprestimo.dto.DevolucaoRequest;
 import com.msemprestimo.emprestimo.dto.EmprestimoRequest;
 import com.msemprestimo.emprestimo.dto.EmprestimoResponse;
 import jakarta.validation.Valid;
@@ -43,9 +44,9 @@ public class EmprestimoController {
 		return service.buscarPorId(id);
 	}
 
-	@PatchMapping("/{id}/devolucao")
-	public EmprestimoResponse devolver(@PathVariable UUID id) {
-		return service.devolver(id);
+	@PatchMapping(path = "/{id}/devolucao", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public EmprestimoResponse devolver(@PathVariable UUID id, @Valid @RequestBody DevolucaoRequest request) {
+		return service.devolver(id, request);
 	}
 
 }

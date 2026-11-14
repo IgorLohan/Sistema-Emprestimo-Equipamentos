@@ -30,6 +30,7 @@ public class EquipamentoService {
 		equipamento.setTipo(request.tipo().trim());
 		equipamento.setPatrimonio(patrimonio);
 		equipamento.setDisponivel(true);
+		equipamento.setCondicao(CondicaoEquipamento.BOM);
 
 		try {
 			return toResponse(repository.saveAndFlush(equipamento));
@@ -85,6 +86,14 @@ public class EquipamentoService {
 		throw new ConflitoException("Equipamento reservado por outro empréstimo");
 	}
 
+	@Transactional
+	public EquipamentoResponse atualizarCondicao(UUID id, CondicaoEquipamento condicao) {
+		Equipamento equipamento = repository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Equipamento não encontrado"));
+		equipamento.setCondicao(condicao);
+		return toResponse(equipamento);
+	}
+
 	private EquipamentoResponse toResponse(Equipamento equipamento) {
 		return new EquipamentoResponse(
 				equipamento.getId(),
@@ -92,7 +101,8 @@ public class EquipamentoService {
 				equipamento.getTipo(),
 				equipamento.getPatrimonio(),
 				equipamento.isDisponivel(),
-				equipamento.getReservaEmprestimoId()
+				equipamento.getReservaEmprestimoId(),
+				equipamento.getCondicao()
 		);
 	}
 

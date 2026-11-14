@@ -1,5 +1,7 @@
 package com.msequipamento.equipamento.dto;
 
+import com.msequipamento.equipamento.CondicaoEquipamento;
+
 import java.util.UUID;
 
 public record EquipamentoResponse(
@@ -8,6 +10,7 @@ public record EquipamentoResponse(
 		String tipo,
 		String patrimonio,
 		boolean disponivel,
-		UUID reservaEmprestimoId
+		UUID reservaEmprestimoId,
+		CondicaoEquipamento condicao
 ) {
 }

@@ -2,6 +2,8 @@ package com.msequipamento.equipamento;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,5 +39,9 @@ public class Equipamento {
 
 	@Column(name = "reserva_emprestimo_id")
 	private UUID reservaEmprestimoId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
+	private CondicaoEquipamento condicao = CondicaoEquipamento.BOM;
 
 }

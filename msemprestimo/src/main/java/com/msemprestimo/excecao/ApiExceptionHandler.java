@@ -31,6 +31,11 @@ public class ApiExceptionHandler {
 		return resposta(ex.getStatus(), ex.getMessage());
 	}
 
+	@ExceptionHandler(RequisicaoInvalidaException.class)
+	public ResponseEntity<ErroResponse> requisicaoInvalida(RequisicaoInvalidaException ex) {
+		return resposta(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErroResponse> validacao(MethodArgumentNotValidException ex) {
 		Map<String, String> campos = new LinkedHashMap<>();

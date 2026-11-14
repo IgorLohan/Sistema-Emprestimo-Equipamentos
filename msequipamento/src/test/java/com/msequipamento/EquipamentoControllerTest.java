@@ -32,6 +32,7 @@ class EquipamentoControllerTest {
 								"""))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.disponivel").value(true))
+				.andExpect(jsonPath("$.condicao").value("BOM"))
 				.andReturn().getResponse().getContentAsString();
 
 		String id = resposta.replaceAll("(?s).*\"id\"\\s*:\\s*\"([^\"]+)\".*", "$1");
@@ -63,6 +64,15 @@ class EquipamentoControllerTest {
 		mockMvc.perform(get("/api/v1/equipamentos/{id}", id))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.disponivel").value(true));
+
+		mockMvc.perform(put("/api/v1/equipamentos/{id}/condicao", id)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"condicao":"AVARIADO"}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.condicao").value("AVARIADO"))
+				.andExpect(jsonPath("$.disponivel").value(true));
 	}
 
 	@Test
@@ -77,6 +87,13 @@ class EquipamentoControllerTest {
 				.andExpect(status().isConflict());
 
 		mockMvc.perform(put("/api/v1/equipamentos/{id}/reservas/{emprestimoId}", UUID.randomUUID(), UUID.randomUUID()))
+				.andExpect(status().isNotFound());
+
+		mockMvc.perform(put("/api/v1/equipamentos/{id}/condicao", UUID.randomUUID())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"condicao":"BOM"}
+								"""))
 				.andExpect(status().isNotFound());
 	}
 

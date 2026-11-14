@@ -8,6 +8,7 @@ public record EquipamentoResumo(
 		String tipo,
 		String patrimonio,
 		boolean disponivel,
-		UUID reservaEmprestimoId
+		UUID reservaEmprestimoId,
+		CondicaoEquipamento condicao
 ) {
 }
